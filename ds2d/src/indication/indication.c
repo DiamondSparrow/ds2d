@@ -17,6 +17,7 @@
 #include "sleep.h"
 #include "types.h"
 #include "debug.h"
+#include "gpio.h"
 
 void INDICATION_LedControl(indication_led_t *indicationLed);
 void *INDICATION_Handler();
@@ -29,6 +30,26 @@ int INDICATION_Init(void)
 	int ret = 0;
 
 	memset(&indication, 0, sizeof indication);
+
+	indication.blue.ledNumber = INDICATION_GPIO_LED_BLUE;
+	indication.green.ledNumber = INDICATION_GPIO_LED_GREEN;
+	indication.yellow.ledNumber = INDICATION_GPIO_LED_YELLOW;
+	indication.red.ledNumber = INDICATION_GPIO_LED_RED;
+
+	GPIO_Export(INDICATION_GPIO_LED_BLUE);
+	GPIO_Export(INDICATION_GPIO_LED_GREEN);
+	GPIO_Export(INDICATION_GPIO_LED_YELLOW);
+	GPIO_Export(INDICATION_GPIO_LED_RED);
+
+	GPIO_SetDirection(INDICATION_GPIO_LED_BLUE, gpioOutput);
+	GPIO_SetDirection(INDICATION_GPIO_LED_GREEN, gpioOutput);
+	GPIO_SetDirection(INDICATION_GPIO_LED_YELLOW, gpioOutput);
+	GPIO_SetDirection(INDICATION_GPIO_LED_RED, gpioOutput);
+
+	GPIO_SetValue(INDICATION_GPIO_LED_BLUE, gpioLow);
+	GPIO_SetValue(INDICATION_GPIO_LED_GREEN, gpioLow);
+	GPIO_SetValue(INDICATION_GPIO_LED_YELLOW, gpioLow);
+	GPIO_SetValue(INDICATION_GPIO_LED_RED, gpioLow);
 
 	INDICATION_Run = TRUE;
 	if( (ret = pthread_create( &INDICATION_Thread, NULL, &INDICATION_Handler, NULL)))
@@ -45,6 +66,17 @@ int INDICATION_Close(void)
 	INDICATION_Run = FALSE;
 	pthread_join(INDICATION_Thread, NULL);
 
+	GPIO_SetValue(INDICATION_GPIO_LED_BLUE, gpioLow);
+	GPIO_SetValue(INDICATION_GPIO_LED_GREEN, gpioLow);
+	GPIO_SetValue(INDICATION_GPIO_LED_YELLOW, gpioLow);
+	GPIO_SetValue(INDICATION_GPIO_LED_RED, gpioLow);
+/*
+	GPIO_Unexport(INDICATION_GPIO_LED_BLUE);
+	GPIO_Unexport(INDICATION_GPIO_LED_GREEN);
+	GPIO_Unexport(INDICATION_GPIO_LED_YELLOW);
+	GPIO_Unexport(INDICATION_GPIO_LED_RED);
+*/
+
 	return 0;
 }
 
@@ -54,18 +86,32 @@ void INDICATION_LedControl(indication_led_t *indicationLed)
 	{
 	case ledON:
 		// Turn on led
+		if(indicationLed->typeCurrent != ledON)
+		{
+			indicationLed->typeCurrent = ledON;
+			GPIO_SetValue(indicationLed->ledNumber, gpioHigh);
+		}
 		break;
 	case ledOFF:
 		// Turn off led.
+		if(indicationLed->typeCurrent != ledOFF)
+		{
+			indicationLed->typeCurrent = ledOFF;
+			GPIO_SetValue(indicationLed->ledNumber, gpioLow);
+		}
 		break;
 	case ledBlinky:
 		if(indicationLed->blinkyPeriodCounter == 0)
 		{
 			// Turn on led.
+			GPIO_SetValue(indicationLed->ledNumber, gpioHigh);
+			indicationLed->blinkyPeriodCounter++;
 		}
 		else if(indicationLed->blinkyPeriodCounter == indicationLed->blinkyOnTime)
 		{
 			// Turn off led.
+			GPIO_SetValue(indicationLed->ledNumber, gpioLow);
+			indicationLed->blinkyPeriodCounter++;
 		}
 		else if(indicationLed->blinkyPeriodCounter == indicationLed->blinkyOffTime)
 		{
@@ -88,6 +134,10 @@ void *INDICATION_Handler()
 	pthread_setname_np(INDICATION_Thread, "ds2d-indication");
 
 	DEBUG_Print(options.debugIndication, debugIndication, "* started.");
+
+	indication.blue.type = ledBlinky;
+	indication.blue.blinkyOnTime = 10;
+	indication.blue.blinkyOffTime = 90;
 
 	while(INDICATION_Run)
 	{

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#PWD=pwd
+NAME="ds2d"
+OUTPUT="$PWD/build/$NAME"
+CC=gcc
+SRC="$PWD/src/ds2d.c $PWD/src/drivers/*.c $PWD/src/indication/*.c $PWD/src/misc/*.c $PWD/src/remote/*.c $PWD/src/wheels/*.c"
+SYMBOLS="-D_GNU_SOURCE"
+LIBS="-lpthread"
+INCLUDES="-I${PWD}/src/drivers/ -I${PWD}/src/indication/ -I${PWD}/src/misc/ -I${PWD}/src/remote/ -I${PWD}/src/wheels/"
+
+$CC $SRC -o $OUTPUT $SYMBOLS $LIBS $INCLUDES

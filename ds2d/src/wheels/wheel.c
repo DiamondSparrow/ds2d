@@ -64,11 +64,13 @@ void *WHEEL_Control(void)
 	pthread_setname_np(WHEEL_Thread, "ds2d-wheel");
 
 	DEBUG_Print(options.debugWheel, debugWheel, "* started.");
+	WHEEL_Left.start = TRUE;
+	WHEEL_Right.start = TRUE;
 
 	while (WHEEL_Run)
 	{
-		ret |= WHEEL_SpeedControl(&WHEEL_Left);
-		//ret |= WHEEL_SpeedControl(&WHEEL_Right);
+		ret = WHEEL_SpeedControl(&WHEEL_Left);
+		ret |= WHEEL_SpeedControl(&WHEEL_Right);
 
 		if (ret != 0)
 		{
@@ -76,16 +78,15 @@ void *WHEEL_Control(void)
 			{
 				WHEEL_Left.stage = wheelVarTemperature;
 			}
-			/*
 			if (WHEEL_Right.stage == wheelVarWait)
 			{
 				WHEEL_Right.stage = wheelVarTemperature;
 			}
-			*/
 			ret = 0;
 		}
+		SLEEP_Delay(0.01);
 		WHEEL_VariableRead(&WHEEL_Left);
-		//WHEEL_VariableRead(&WHEEL_Right);
+		WHEEL_VariableRead(&WHEEL_Right);
 
 		SLEEP_Delay(0.001);
 	}
@@ -98,6 +99,7 @@ void *WHEEL_Control(void)
 static int WHEEL_SpeedControl(wheel_t *wheel)
 {
 	int ret = 0;
+
 	if (wheel->start)
 	{
 		POLOLU_ExitSafeStart(wheel->id);
@@ -133,7 +135,7 @@ static int WHEEL_VariableRead(wheel_t *wheel)
 	{
 	case wheelVarTemperature:
 		wheel->temperature = (float) POLOLU_GetVariable(wheel->id, POLOLU_VARIABLE_TEMPERATURE) / 10;
-		WHEEL_Left.varDebug = TRUE;
+		wheel->varDebug = TRUE;
 		wheel->stage++;
 		break;
 	case wheelVarVoltage:

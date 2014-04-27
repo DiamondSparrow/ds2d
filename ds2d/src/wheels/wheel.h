@@ -8,7 +8,7 @@
 #ifndef WHEEL_H_
 #define WHEEL_H_
 
-#define WHEEL_DEV		"/dev/ttyACM0"
+#define WHEEL_DEV		"/dev/ttyO4"
 #define WHEEL_BAUDRATE	115200
 #define WHEEL_LEFT_ID	2
 #define WHEEL_RIGHT_ID	1
