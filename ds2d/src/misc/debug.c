@@ -17,7 +17,7 @@
 
 pthread_mutex_t DEBUG_Mutex = PTHREAD_MUTEX_INITIALIZER;
 #if DEBUG_USE_HEADER
-const char DEBUG_TypeNames[debugNone + 1][10] = { "main", "indication", "remote", "unknown" };
+const char DEBUG_TypeNames[debugNone+1][10] = { "main", "indication", "remote", "wheel", "unknown" };
 #endif
 
 void DEBUG_Print(int debugFlag, debug_types_e debugType, void *str, ...)
@@ -33,7 +33,7 @@ void DEBUG_Print(int debugFlag, debug_types_e debugType, void *str, ...)
 		pthread_mutex_lock(&DEBUG_Mutex);
 #if DEBUG_USE_HEADER
 		printf("[%lld] ds2d-%-10.10s: ",
-				(localTime.tv_sec*1000LL + localTime.tv_usec/1000)/100,
+				(localTime.tv_sec*1000LL + localTime.tv_usec/1000),
 				DEBUG_TypeNames[debugType]);
 #endif
 		va_start(args, str);

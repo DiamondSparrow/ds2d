@@ -10,7 +10,7 @@
 
 #define DAEMONIZE_NAME 		"ds2d"
 #define DAEMONIZE_LOCKFILE	"/run/lock/"
-#define DAEMONIZE_USER		"ds2"
+#define DAEMONIZE_USER		"root"
 
 #ifndef EXIT_SUCCESS
 #define EXIT_SUCCESS	0
@@ -21,7 +21,6 @@
 #endif
 
 void DAEMONIZE_Init ( void );
-void DAEMONIZE_LogOpen ( void );
-void DAEMONIZE_LogClose ( void );
+void DAEMONIZE_Close ( void );
 
 #endif /* DAEMONIZE_H_ */

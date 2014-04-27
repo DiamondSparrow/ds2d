@@ -21,10 +21,10 @@
 
 #include "daemonize.h"
 
-static size_t DAEMONIZE_LogToWriter(void *cookie, char const *data, size_t leng);
-static int DAEMONIZE_LogToWriterNoop(void);
+size_t DAEMONIZE_LogToWriter(void *cookie, char const *data, size_t leng);
+int DAEMONIZE_LogToWriterNoop(void);
 void DAEMONIZE_LogTo(FILE **pStream);
-static void DAEMONIZE_ChildHandler(int signalNumber);
+void DAEMONIZE_ChildHandler(int signalNumber);
 
 static char const *priov[] = { "EMERG:", "ALERT:", "CRIT:", "ERR:", "WARNING:", "NOTICE:", "INFO:","DEBUG:" };
 static cookie_io_functions_t DAEMONIZE_LogToWriterFNS =
@@ -42,6 +42,10 @@ void DAEMONIZE_Init(void)
 	pid_t parent = 0;
 	int lfp = -1;
 	const char *lockfile = DAEMONIZE_LOCKFILE "" DAEMONIZE_NAME;
+	/* Open loging.	*/
+	openlog( DAEMONIZE_NAME, LOG_PID, LOG_LOCAL5);
+	syslog( LOG_INFO, "starting");
+	//DAEMONIZE_LogTo(&stderr);
 
 	/* Already a daemon */
 	if (getppid() == 1)
@@ -65,7 +69,7 @@ void DAEMONIZE_Init(void)
 		struct passwd *pw = getpwnam(DAEMONIZE_USER);
 		if (pw)
 		{
-			syslog( LOG_NOTICE, "setting user to " DAEMONIZE_USER);
+			syslog( LOG_NOTICE, "setting user to " DAEMONIZE_USER ".");
 			setuid(pw->pw_uid);
 		}
 	}
@@ -76,17 +80,15 @@ void DAEMONIZE_Init(void)
 	signal(SIGALRM, DAEMONIZE_ChildHandler);
 
 	/* Fork off the parent process */
-	pid = fork();
-	if (pid < 0)
+	if ((pid = fork()) < 0)
 	{
 		syslog( LOG_ERR, "unable to fork daemon, code=%d (%s)",
-		errno, strerror(errno));
+				errno, strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 	/* If we got a good PID, then we can exit the parent process. */
 	if (pid > 0)
 	{
-
 		/*
 		 * Wait for confirmation from the child via SIGTERM or SIGCHLD, or
 		 * for two seconds to elapse (SIGALRM).  pause() should not return.
@@ -112,8 +114,7 @@ void DAEMONIZE_Init(void)
 	umask(0);
 
 	/* Create a new SID for the child process */
-	sid = setsid();
-	if (sid < 0)
+	if ((sid = setsid()) < 0)
 	{
 		syslog( LOG_ERR, "unable to create a new session, code %d (%s)",
 		errno, strerror(errno));
@@ -142,24 +143,15 @@ void DAEMONIZE_Init(void)
 	return;
 }
 
-void DAEMONIZE_LogOpen(void)
+void DAEMONIZE_Close(void)
 {
-	openlog( DAEMONIZE_NAME, LOG_PID, LOG_LOCAL5);
-	syslog( LOG_INFO, "starting");
-	DAEMONIZE_LogTo(&stderr);
-
-	return;
-}
-
-void DAEMONIZE_LogClose(void)
-{
-	syslog( LOG_NOTICE, "terminated");
+	syslog( LOG_NOTICE, "closing.");
 	closelog();
 
 	return;
 }
 
-static size_t DAEMONIZE_LogToWriter(void *cookie, char const *data, size_t leng)
+size_t DAEMONIZE_LogToWriter(void *cookie, char const *data, size_t leng)
 {
 	(void) cookie;
 	int p = LOG_DEBUG, len;
@@ -175,21 +167,23 @@ static size_t DAEMONIZE_LogToWriter(void *cookie, char const *data, size_t leng)
 		++data, --leng;
 
 	syslog(p, "%.*s", leng, data);
+
 	return leng;
 }
 
-static int DAEMONIZE_LogToWriterNoop(void)
+int DAEMONIZE_LogToWriterNoop(void)
 {
 	return 0;
 }
 
 void DAEMONIZE_LogTo(FILE **pStream)
 {
-	setvbuf(*pStream = fopencookie(NULL, "w", DAEMONIZE_LogToWriterFNS), NULL,
-			_IOLBF, 0);
+	setvbuf(*pStream = fopencookie(NULL, "w", DAEMONIZE_LogToWriterFNS), NULL, _IOLBF, 0);
+
+	return;
 }
 
-static void DAEMONIZE_ChildHandler(int signalNumber)
+void DAEMONIZE_ChildHandler(int signalNumber)
 {
 	switch (signalNumber)
 	{

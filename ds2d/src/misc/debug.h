@@ -15,6 +15,7 @@ typedef enum _debug_types
 	debugMain,
 	debugIndication,
 	debugRemote,
+	debugWheel,
 	debugNone
 } debug_types_e;
 

@@ -25,6 +25,8 @@ typedef struct _options
 	int debugIndication;
 	int debugRemote;
 	int debugTcpServer;
+	int debugWheel;
+
 	int tcpPort;
 } options_t;
 

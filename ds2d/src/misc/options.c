@@ -15,7 +15,7 @@
 void OPTIONS_Init(options_t *options, int argc, char *argv[])
 {
 	int nextOption;
-	const char *shortOptions = "hVdirtp:";
+	const char *shortOptions = "hVdirtwp:";
 	const struct option longOptions[] =
 	{
 			{ "port", required_argument, NULL, 'p' },
@@ -23,6 +23,7 @@ void OPTIONS_Init(options_t *options, int argc, char *argv[])
 			{ "indication", no_argument, NULL, 'i' },
 			{ "remote", no_argument, NULL, 'r' },
 			{ "tcp", no_argument, NULL, 't' },
+			{ "wheel", no_argument, NULL, 'w' },
 			{ "Version", no_argument, NULL, 'V' },
 			{ "help", no_argument, NULL, 'h' },
 			{ NULL, no_argument, NULL, 0 }
@@ -32,6 +33,7 @@ void OPTIONS_Init(options_t *options, int argc, char *argv[])
 	options->debugIndication = FALSE;
 	options->debugRemote = FALSE;
 	options->debugTcpServer = FALSE;
+	options->debugWheel = FALSE;
 
 	options->tcpPort = OPTIONS_DEFAULT_TCP_PORT;
 
@@ -58,6 +60,9 @@ void OPTIONS_Init(options_t *options, int argc, char *argv[])
 			break;
 		case 't':
 			options->debugTcpServer = TRUE;
+			break;
+		case 'w':
+			options->debugWheel = TRUE;
 			break;
 
 		case 'V':

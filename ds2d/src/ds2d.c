@@ -20,6 +20,7 @@
 
 #include "indication.h"
 #include "remote.h"
+#include "wheel.h"
 
 volatile unsigned int run = 1;
 
@@ -31,7 +32,6 @@ int main(int argc, char *argv[])
 
 	if(!options.debug)
 	{
-		DAEMONIZE_LogOpen();
 		DAEMONIZE_Init();
 	}
 	else
@@ -57,22 +57,28 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "ERROR: Failed to initialize remote.\n");
 		exit(EXIT_FAILURE);
 	}
+	if(WHEEL_Init() < 0)
+	{
+		fprintf(stderr, "ERROR: Failed to initialize wheel.\n");
+		exit(EXIT_FAILURE);
+	}
 
 	SLEEP_Delay(0.1);
 
-	DEBUG_Print(options.debug, debugMain, "runnning.");
+	DEBUG_Print(options.debug, debugMain, "# runnning.");
 
 	while(run)
 	{
 		SLEEP_Delay(1.0);
 	}
 
+	WHEEL_Close();
 	REMOTE_Close();
 	INDICATION_Close();
 
 	if(!options.debug)
 	{
-		DAEMONIZE_LogClose();
+		DAEMONIZE_Close();
 	}
 
 	return EXIT_SUCCESS;

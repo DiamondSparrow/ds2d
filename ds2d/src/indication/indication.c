@@ -87,7 +87,7 @@ void *INDICATION_Handler()
 {
 	pthread_setname_np(INDICATION_Thread, "ds2d-indication");
 
-	DEBUG_Print(options.debugIndication, debugIndication, "started.");
+	DEBUG_Print(options.debugIndication, debugIndication, "* started.");
 
 	while(INDICATION_Run)
 	{
@@ -109,7 +109,7 @@ void *INDICATION_Handler()
 		}
 	}
 
-	DEBUG_Print(options.debugIndication, debugIndication, "stopped.");
+	DEBUG_Print(options.debugIndication, debugIndication, "x stopped.");
 
 	return (NULL);
 }

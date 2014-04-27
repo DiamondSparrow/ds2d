@@ -20,4 +20,6 @@
 #define NULL	((void *)0)
 #endif
 
+#define BIT_IS_SET(var,pos) ((var) & (1<<(pos)))
+
 #endif /* TYPES_H_ */

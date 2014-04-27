@@ -69,7 +69,7 @@ void *REMOTE_Server()
 
 	pthread_setname_np(REMOTE_Thread, "ds2d-remote");
 
-	DEBUG_Print(options.debugRemote, debugRemote, "started.");
+	DEBUG_Print(options.debugRemote, debugRemote, "* started.");
 
 	while (REMOTE_ServerRun)
 	{
@@ -96,7 +96,7 @@ void *REMOTE_Server()
 				REMOTE_ServerRun = FALSE;
 				break;
 			}
-			pthread_setname_np(threadClient, "ds2d-client");
+			pthread_setname_np(threadClient, "x ds2d-client");
 		}
 		SLEEP_Delay(0.1);
 	}
