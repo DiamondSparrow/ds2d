@@ -32,8 +32,8 @@ void DEBUG_Print(int debugFlag, debug_types_e debugType, void *str, ...)
 	{
 		pthread_mutex_lock(&DEBUG_Mutex);
 #if DEBUG_USE_HEADER
-		printf("[%ld] ds2d-%-10.10s: ",
-				(localTime.tv_sec*1000LL + localTime.tv_usec/1000),
+		printf("[%lld] ds2d-%-10.10s: ",
+				(localTime.tv_sec*1000LL + localTime.tv_usec/1000)/100,
 				DEBUG_TypeNames[debugType]);
 #endif
 		va_start(args, str);
