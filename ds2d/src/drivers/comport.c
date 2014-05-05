@@ -50,18 +50,18 @@ int COMPORT_Connect(comport_t *com)
 
 	memset(&newtio, 0, sizeof(struct termios));
 
-	newtio.c_cflag &= ~CRTSCTS; /* disable hardware flow control */
-	newtio.c_cflag &= ~PARENB; /* no parity */
-	newtio.c_cflag &= ~CSTOPB; /* send one stop bit */
-	newtio.c_cflag &= ~CSIZE; /* character size mask */
-	newtio.c_cflag &= ~HUPCL; /* disable hang up */
-	newtio.c_cflag |= CS8 | CLOCAL | CREAD; /* 8 bits per byte | ignore modem control lines | enable receiver */
-	newtio.c_iflag &= ~(IXON | IXOFF); /* disable XON/XOFF flow control on output & input */
-	newtio.c_iflag |= IGNBRK | IGNPAR; /* ignore BREAK condition on input & framing errors & parity errors */
-	newtio.c_oflag &= ~OPOST; /* disable output processing */
-	newtio.c_lflag = 0; /* echo off, echo newline off, canonical mode off */
-	newtio.c_cc[VMIN] = 0; /* disable timeout */
-	newtio.c_cc[VTIME] = 10; /* wait for data, deciseconds */
+	newtio.c_cflag &= ~CRTSCTS;				/* disable hardware flow control */
+	newtio.c_cflag &= ~PARENB;				/* no parity */
+	newtio.c_cflag &= ~CSTOPB;				/* send one stop bit */
+	newtio.c_cflag &= ~CSIZE;				/* character size mask */
+	newtio.c_cflag &= ~HUPCL;				/* disable hang up */
+	newtio.c_cflag |= CS8 | CLOCAL | CREAD;	/* 8 bits per byte | ignore modem control lines | enable receiver */
+	newtio.c_iflag &= ~(IXON | IXOFF);		/* disable XON/XOFF flow control on output & input */
+	newtio.c_iflag |= IGNBRK | IGNPAR;		/* ignore BREAK condition on input & framing errors & parity errors */
+	newtio.c_oflag &= ~OPOST;				/* disable output processing */
+	newtio.c_lflag = 0;						/* echo off, echo newline off, canonical mode off */
+	newtio.c_cc[VMIN] = 3;					/* disable timeout */
+	newtio.c_cc[VTIME] = 10; 				/* wait for data, deciseconds */
 
 	/*
 	 * C_ISPEED		Input baud (new interface)

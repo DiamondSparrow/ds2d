@@ -21,6 +21,7 @@ typedef enum _wheel_var
 	wheelVarErrorSerial,
 	wheelVarLimitStatus,
 	wheelVarResetFlags,
+	wheelVarDebug,
 	wheelVarWait
 } wheel_var_e;
 

@@ -54,15 +54,19 @@ void OPTIONS_Init(options_t *options, int argc, char *argv[])
 			break;
 		case 'i':
 			options->debugIndication = TRUE;
+			options->debug = TRUE;
 			break;
 		case 'r':
 			options->debugRemote= TRUE;
+			options->debug = TRUE;
 			break;
 		case 't':
 			options->debugTcpServer = TRUE;
+			options->debug = TRUE;
 			break;
 		case 'w':
 			options->debugWheel = TRUE;
+			options->debug = TRUE;
 			break;
 
 		case 'V':

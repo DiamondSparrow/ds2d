@@ -67,13 +67,15 @@ void *WHEEL_Control(void)
 	WHEEL_Left.start = TRUE;
 	WHEEL_Right.start = TRUE;
 
+	SLEEP_Delay(1.0);
+
 	while (WHEEL_Run)
 	{
 		ret = WHEEL_SpeedControl(&WHEEL_Left);
 		ret |= WHEEL_SpeedControl(&WHEEL_Right);
 
-		if (ret != 0)
-		{
+		//if (ret != 0)
+		//{
 			if (WHEEL_Left.stage == wheelVarWait)
 			{
 				WHEEL_Left.stage = wheelVarTemperature;
@@ -82,13 +84,13 @@ void *WHEEL_Control(void)
 			{
 				WHEEL_Right.stage = wheelVarTemperature;
 			}
-			ret = 0;
-		}
-		SLEEP_Delay(0.01);
+			//ret = 0;
+		//}
+		SLEEP_Delay(0.005);
 		WHEEL_VariableRead(&WHEEL_Left);
+		SLEEP_Delay(0.01);
 		WHEEL_VariableRead(&WHEEL_Right);
-
-		SLEEP_Delay(0.001);
+		//SLEEP_Delay(1.0);
 	}
 
 	DEBUG_Print(options.debugWheel, debugWheel, "x stopped.");
@@ -134,12 +136,12 @@ static int WHEEL_VariableRead(wheel_t *wheel)
 	switch (wheel->stage)
 	{
 	case wheelVarTemperature:
-		wheel->temperature = (float) POLOLU_GetVariable(wheel->id, POLOLU_VARIABLE_TEMPERATURE) / 10;
+		wheel->temperature = (float)POLOLU_GetVariable(wheel->id, POLOLU_VARIABLE_TEMPERATURE) / 10;
 		wheel->varDebug = TRUE;
 		wheel->stage++;
 		break;
 	case wheelVarVoltage:
-		wheel->voltage = (float) POLOLU_GetVariable(wheel->id, POLOLU_VARIABLE_INPUT_VOLTAGE) / 1000;
+		wheel->voltage = (float)POLOLU_GetVariable(wheel->id, POLOLU_VARIABLE_INPUT_VOLTAGE) / 1000;
 		wheel->stage++;
 		break;
 	case wheelVarErrorStatus:
@@ -159,15 +161,14 @@ static int WHEEL_VariableRead(wheel_t *wheel)
 		wheel->resetFlags = POLOLU_GetVariable(wheel->id, POLOLU_VARIABLE_RESET_FLAGS);
 		wheel->stage++;
 		break;
-	case wheelVarWait:
-		// -
+	case wheelVarDebug:
 		if(wheel->varDebug == TRUE)
 		{
 			wheel->varDebug = FALSE;
 			DEBUG_Print(options.debugWheel, debugWheel, "? %s data - "
 					"temperature %05.02f C., voltage %03.02f V., "
 					"Errors 0x%04X/0x%04X/%04X, Limits 0x%04X, Reset 0x%02X.",
-					wheel->id == WHEEL_LEFT_ID ? "left" : "right",
+					wheel->id == WHEEL_LEFT_ID ? "left " : "right",
 					wheel->temperature,
 					wheel->voltage,
 					wheel->errorStatus,
@@ -185,6 +186,9 @@ static int WHEEL_VariableRead(wheel_t *wheel)
 				}
 			}
 		}
+		wheel->stage++;
+		break;
+	case wheelVarWait:
 		break;
 	default:
 		wheel->stage = 0;

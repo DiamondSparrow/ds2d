@@ -36,6 +36,13 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
+        printf("\033[2J\033[1;1H\033[37m");
+        printf("\033[1;15H .-'/ ,_  \'-.   ");
+        printf("\033[2;15H/  (  ( >  )  \\ ");
+        printf("\033[3;15H\\   '-' '-'   / ");
+        printf("\033[4;15H'-..__ __..-'    ");
+        printf("\033[5;15H      /_\\       ");
+        printf("\033[0m");
 		printf("\n\t%s %d.%d.%d.%d (%s)\n\n", OPTIONS_SOFTWARE_NAME,
 				OPTIONS_SOFTWARE_MAJOR,
 				OPTIONS_SOFTWARE_MINOR,

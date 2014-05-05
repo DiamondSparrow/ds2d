@@ -136,8 +136,8 @@ void *INDICATION_Handler()
 	DEBUG_Print(options.debugIndication, debugIndication, "* started.");
 
 	indication.blue.type = ledBlinky;
-	indication.blue.blinkyOnTime = 10;
-	indication.blue.blinkyOffTime = 90;
+	indication.blue.blinkyOnTime = 5;
+	indication.blue.blinkyOffTime = 95;
 
 	while(INDICATION_Run)
 	{

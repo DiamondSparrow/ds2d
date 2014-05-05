@@ -153,8 +153,7 @@ int POLOLU_GetVariable(int deviceNumber, int variableID)
 {
 
 	unsigned char packet[] = { POLOLU_COMMAND_BYTE, 0x00, POLOLU_COMMAND_EXIT_GET_VARIABLE, 0x00, 0x00 };
-	unsigned char response[2] =
-	{ 0 };
+	unsigned char response[2] = {0};
 
 	packet[1] = deviceNumber;
 	packet[3] = variableID;
