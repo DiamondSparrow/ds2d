@@ -26,7 +26,7 @@ int DAEMONIZE_LogToWriterNoop(void);
 void DAEMONIZE_LogTo(FILE **pStream);
 void DAEMONIZE_ChildHandler(int signalNumber);
 
-static char const *priov[] = { "EMERG:", "ALERT:", "CRIT:", "ERR:", "WARNING:", "NOTICE:", "INFO:","DEBUG:" };
+static char const *priov[] = {"EMERG:","ALERT:","CRIT:","ERR:","WARNING:","NOTICE:","INFO:","DEBUG:"};
 static cookie_io_functions_t DAEMONIZE_LogToWriterFNS =
 {
 		(void*) DAEMONIZE_LogToWriterNoop,

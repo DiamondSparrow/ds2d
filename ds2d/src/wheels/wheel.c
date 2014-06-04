@@ -74,8 +74,8 @@ void *WHEEL_Control(void)
 		ret = WHEEL_SpeedControl(&WHEEL_Left);
 		ret |= WHEEL_SpeedControl(&WHEEL_Right);
 
-		//if (ret != 0)
-		//{
+		if (ret != 0)
+		{
 			if (WHEEL_Left.stage == wheelVarWait)
 			{
 				WHEEL_Left.stage = wheelVarTemperature;
@@ -84,13 +84,11 @@ void *WHEEL_Control(void)
 			{
 				WHEEL_Right.stage = wheelVarTemperature;
 			}
-			//ret = 0;
-		//}
-		SLEEP_Delay(0.005);
+			ret = 0;
+		}
 		WHEEL_VariableRead(&WHEEL_Left);
-		SLEEP_Delay(0.01);
 		WHEEL_VariableRead(&WHEEL_Right);
-		//SLEEP_Delay(1.0);
+		SLEEP_Delay(0.01);
 	}
 
 	DEBUG_Print(options.debugWheel, debugWheel, "x stopped.");
