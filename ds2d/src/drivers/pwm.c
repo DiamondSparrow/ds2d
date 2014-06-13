@@ -16,15 +16,20 @@
 
 #include "pwm.h"
 
-int PWM_Init(pwm_t *pwm, unsigned int port, unsigned int pin)
+int PWM_Init(pwm_t *pwm, unsigned int port, unsigned int pin, unsigned int nr)
 {
     char file[64] = {0};
 
     pwm->port = port;
     pwm->pin = pin;
+    pwm->nr = pin;
 
-    sprintf(file, "%s/pwm_test_P%d_%d.14/%s", PWM_SYSFS_EHRPWM_PREFIX,
-            pwm->port, pwm->pin, PWM_SYSFS_EHRPWM_DUTY);
+    sprintf(file, "%s/pwm_test_P%d_%d.%d/%s",
+            PWM_SYSFS_EHRPWM_PREFIX,
+            pwm->port,
+            pwm->pin,
+            pwm->nr ,
+            PWM_SYSFS_EHRPWM_DUTY);
     if ((pwm->dutyStream = open(file, O_WRONLY)) < 0)
     {
         fprintf(stderr, "ERROR: Failed to open to file '%s'. %s.\n", file,
@@ -32,8 +37,12 @@ int PWM_Init(pwm_t *pwm, unsigned int port, unsigned int pin)
         return -1;
     }
 
-    sprintf(file, "%s/pwm_test_P%d_%d.14/%s", PWM_SYSFS_EHRPWM_PREFIX,
-            pwm->port, pwm->pin, PWM_SYSFS_EHRPWM_PERIOD);
+    sprintf(file, "%s/pwm_test_P%d_%d.%d/%s",
+            PWM_SYSFS_EHRPWM_PREFIX,
+            pwm->port,
+            pwm->pin,
+            pwm->nr ,
+            PWM_SYSFS_EHRPWM_PERIOD);
     if ((pwm->periodStream = open(file, O_WRONLY)) < 0)
     {
         fprintf(stderr, "ERROR: Failed to open to file '%s'. %s.\n", file,
@@ -41,8 +50,12 @@ int PWM_Init(pwm_t *pwm, unsigned int port, unsigned int pin)
         return -2;
     }
 
-    sprintf(file, "%s/pwm_test_P%d_%d.14/%s", PWM_SYSFS_EHRPWM_PREFIX,
-            pwm->port, pwm->pin, PWM_SYSFS_EHRPWM_POLARITY);
+    sprintf(file, "%s/pwm_test_P%d_%d.%d/%s"
+            PWM_SYSFS_EHRPWM_PREFIX,
+            pwm->port,
+            pwm->pin,
+            pwm->nr ,
+            PWM_SYSFS_EHRPWM_POLARITY);
     if ((pwm->polarityStream = open(file, O_WRONLY)) < 0)
     {
         fprintf(stderr, "ERROR: Failed to open to file '%s'. %s.\n", file,
@@ -50,8 +63,12 @@ int PWM_Init(pwm_t *pwm, unsigned int port, unsigned int pin)
         return -3;
     }
 
-    sprintf(file, "%s/pwm_test_P%d_%d.14/%s", PWM_SYSFS_EHRPWM_PREFIX,
-            pwm->port, pwm->pin, PWM_SYSFS_EHRPWM_RUN);
+    sprintf(file, "%s/pwm_test_P%d_%d.%d/%s",
+            PWM_SYSFS_EHRPWM_PREFIX,
+            pwm->port,
+            pwm->pin,
+            pwm->nr ,
+            PWM_SYSFS_EHRPWM_RUN);
     if ((pwm->runStream = open(file, O_WRONLY)) < 0)
     {
         fprintf(stderr, "ERROR: Failed to open to file '%s'. %s.\n", file,

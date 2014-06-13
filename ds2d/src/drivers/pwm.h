@@ -16,9 +16,10 @@
 
 typedef struct _pwm
 {
-    // P{port}_{pin}:
+    // P{port}_{pin}.{nr}:
     unsigned int port;
     unsigned int pin;
+    unsigned int nr;
     // Values:
     int duty;
     int period;
@@ -31,7 +32,7 @@ typedef struct _pwm
     int runStream;
 } pwm_t;
 
-int PWM_Init(pwm_t *pwm, unsigned int port, unsigned int pin);
+int PWM_Init(pwm_t *pwm, unsigned int port, unsigned int pin, unsigned int nr);
 int PWM_Deinit(pwm_t *pwm);
 
 int PWM_SetDuty(pwm_t *pwm, int duty);

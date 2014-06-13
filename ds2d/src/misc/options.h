@@ -22,6 +22,7 @@
 typedef struct _options
 {
 	int debug;
+    int debugGps;
 	int debugIndication;
 	int debugRemote;
 	int debugTcpServer;

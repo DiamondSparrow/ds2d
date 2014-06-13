@@ -13,6 +13,7 @@
 typedef enum _debug_types
 {
 	debugMain,
+	debugGps,
 	debugIndication,
 	debugRemote,
 	debugWheel,

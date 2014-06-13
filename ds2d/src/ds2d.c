@@ -22,6 +22,7 @@
 #include "remote.h"
 #include "wheel.h"
 #include "pwm.h"
+#include "gps_api.h"
 
 volatile unsigned int run = 1;
 
@@ -56,6 +57,9 @@ int main(int argc, char *argv[])
     signal(SIGINT, terminate);
     signal(SIGTERM, terminate);
 
+    GPS_Init();
+
+/*
     if (INDICATION_Init() < 0)
     {
         fprintf(stderr, "ERROR: Failed to initialize indication.\n");
@@ -71,7 +75,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "ERROR: Failed to initialize wheel.\n");
         exit(EXIT_FAILURE);
     }
-
+*/
     SLEEP_Delay(0.1);
 
     DEBUG_Print(options.debug, debugMain, "# runnning.");
@@ -81,9 +85,10 @@ int main(int argc, char *argv[])
         SLEEP_Delay(1.0);
     }
 
-    WHEEL_Close();
-    REMOTE_Close();
-    INDICATION_Close();
+    //WHEEL_Close();
+    //REMOTE_Close();
+    //INDICATION_Close();
+    GPS_Close();
 
     if (!options.debug)
     {
