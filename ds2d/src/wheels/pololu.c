@@ -101,7 +101,7 @@ void POLOLU_ExitSafeStart(int deviceNumber)
 
 void POLOLU_MotorForward(int deviceNumber, int speed)
 {
-	unsigned char packet[] = { POLOLU_COMMAND_BYTE, 0x00, POLOLU_COMMAND_EXIT_MOTOR_FORWARD, 0x00, 0x00, 0x00 };
+	unsigned char packet[] = { POLOLU_COMMAND_BYTE, 0x00, POLOLU_COMMAND_MOTOR_FORWARD, 0x00, 0x00, 0x00 };
 
 	packet[1] = deviceNumber;
 	packet[3] = speed % 32;
@@ -118,7 +118,7 @@ void POLOLU_MotorForward(int deviceNumber, int speed)
 
 void POLOLU_MotorReverse(int deviceNumber, int speed)
 {
-	unsigned char packet[] = { POLOLU_COMMAND_BYTE, 0x00, POLOLU_COMMAND_EXIT_MOTOR_REVERSE, 0x00, 0x00, 0x00 };
+	unsigned char packet[] = { POLOLU_COMMAND_BYTE, 0x00, POLOLU_COMMAND_MOTOR_REVERSE, 0x00, 0x00, 0x00 };
 
 	packet[1] = deviceNumber;
 	packet[3] = speed % 32;
@@ -135,7 +135,7 @@ void POLOLU_MotorReverse(int deviceNumber, int speed)
 
 void POLOLU_MotorBreake(int deviceNumber, int brakeAmount)
 {
-	unsigned char packet[] = { POLOLU_COMMAND_BYTE, 0x00, POLOLU_COMMAND_EXIT_MOTOR_BRAKE, 0x00, 0x00 };
+	unsigned char packet[] = { POLOLU_COMMAND_BYTE, 0x00, POLOLU_COMMAND_MOTOR_BRAKE, 0x00, 0x00 };
 
 	packet[1] = deviceNumber;
 	packet[3] = brakeAmount;
@@ -152,7 +152,7 @@ void POLOLU_MotorBreake(int deviceNumber, int brakeAmount)
 int POLOLU_GetVariable(int deviceNumber, int variableID)
 {
 
-	unsigned char packet[] = { POLOLU_COMMAND_BYTE, 0x00, POLOLU_COMMAND_EXIT_GET_VARIABLE, 0x00, 0x00 };
+	unsigned char packet[] = { POLOLU_COMMAND_BYTE, 0x00, POLOLU_COMMAND_GET_VARIABLE, 0x00, 0x00 };
 	unsigned char response[2] = {0};
 
 	packet[1] = deviceNumber;
@@ -185,7 +185,7 @@ int POLOLU_GetFirmwareVersion(int deviceNumber)
 
 void POLOLU_StopMotor(int deviceNumber)
 {
-	unsigned char packet[4] = { POLOLU_COMMAND_BYTE, 0x00, POLOLU_COMMAND_EXIT_STOP_MOTOR, 0x00 };
+	unsigned char packet[4] = { POLOLU_COMMAND_BYTE, 0x00, POLOLU_COMMAND_STOP_MOTOR, 0x00 };
 	packet[1] = deviceNumber;
 	packet[3] = crcGet(packet, 3);
 

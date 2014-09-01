@@ -21,8 +21,9 @@
 #include "indication.h"
 #include "remote.h"
 #include "wheel.h"
-#include "pwm.h"
-#include "gps_api.h"
+//#include "pwm.h"
+//#include "gps_api.h"
+#include "qik.h"
 
 volatile unsigned int run = 1;
 
@@ -30,6 +31,7 @@ void terminate(int signalNumber);
 
 int main(int argc, char *argv[])
 {
+    unsigned char tmp = 0;
     OPTIONS_Init(&options, argc, argv);
 
     if (!options.debug)
@@ -57,9 +59,38 @@ int main(int argc, char *argv[])
     signal(SIGINT, terminate);
     signal(SIGTERM, terminate);
 
-    GPS_Init();
+    QIK_Init("/dev/ttyUSB0", 115200, QIK_DEFAULT_DEVICE_ID);
 
+    tmp = QIK_GetFirmwareVersion();
+    printf("FW %c\n", tmp);
+    tmp = QIK_GetErrorByte();
+    printf("ERROR %d\n", tmp);
+    tmp = QIK_GetConfigParam(QIK_PRM_DEVICE_ID);
+    printf("QIK_PRM_DEVICE_ID %d\n", tmp);
+    tmp = QIK_GetConfigParam(QIK_PRM_PWM);
+    printf("QIK_PRM_PWM %d\n", tmp);
+    tmp = QIK_GetConfigParam(QIK_PRM_SHUTDOWN_ERROR);
+    printf("QIK_PRM_SHUTDOWN_ERROR %d\n", tmp);
+    tmp = QIK_GetConfigParam(QIK_PRM_SERIAL_TIMEOUT);
+    printf("QIK_PRM_SERIAL_TIMEOUT %d\n", tmp);
+    tmp = QIK_GetConfigParam(QIK_PRM_M0_ACCELERATION);
+    printf("QIK_PRM_M0_ACCELERATION %d\n", tmp);
+    tmp = QIK_GetConfigParam(QIK_PRM_M1_ACCELERATION);
+    printf("QIK_PRM_M1_ACCELERATION %d\n", tmp);
+    tmp = QIK_GetConfigParam(QIK_PRM_M0_BRAKE_DURATION);
+    printf("QIK_PRM_M0_BRAKE_DURATION %d\n", tmp);
+    tmp = QIK_GetConfigParam(QIK_PRM_M1_BRAKE_DURATION);
+    printf("QIK_PRM_M1_BRAKE_DURATION %d\n", tmp);
+    tmp = QIK_GetConfigParam(QIK_PRM_M0_CURRENT_LIMIT);
+    printf("QIK_PRM_M0_CURRENT_LIMIT %d\n", tmp);
+    tmp = QIK_GetConfigParam(QIK_PRM_M1_CURRENT_LIMIT);
+    printf("QIK_PRM_M1_CURRENT_LIMIT %d\n", tmp);
+    tmp = QIK_GetConfigParam(QIK_PRM_M0_CURRENT_LIMIT_RESPONSE);
+    printf("QIK_PRM_M0_CURRENT_LIMIT_RESPONSE %d\n", tmp);
+    tmp = QIK_GetConfigParam(QIK_PRM_M1_CURRENT_LIMIT_RESPONSE);
+    printf("QIK_PRM_M1_CURRENT_LIMIT_RESPONSE %d\n", tmp);
 /*
+    GPS_Init();
     if (INDICATION_Init() < 0)
     {
         fprintf(stderr, "ERROR: Failed to initialize indication.\n");
@@ -88,7 +119,7 @@ int main(int argc, char *argv[])
     //WHEEL_Close();
     //REMOTE_Close();
     //INDICATION_Close();
-    GPS_Close();
+    //GPS_Close();
 
     if (!options.debug)
     {
