@@ -17,7 +17,7 @@
 
 pthread_mutex_t DEBUG_Mutex = PTHREAD_MUTEX_INITIALIZER;
 #if DEBUG_USE_HEADER
-const char DEBUG_TypeNames[debugNone+1][10] = { "main", "gps", "indication", "remote", "wheel", "unknown" };
+const char DEBUG_TypeNames[debugNone+1][10] = { "main", "config", "gps", "indication", "remote", "wheel", "unknown" };
 #endif
 
 void DEBUG_Print(int debugFlag, debug_types_e debugType, void *str, ...)

@@ -24,6 +24,7 @@
 //#include "pwm.h"
 //#include "gps_api.h"
 #include "qik.h"
+#include "config.h"
 
 volatile unsigned int run = 1;
 
@@ -31,7 +32,6 @@ void terminate(int signalNumber);
 
 int main(int argc, char *argv[])
 {
-    unsigned char tmp = 0;
     OPTIONS_Init(&options, argc, argv);
 
     if (!options.debug)
@@ -59,7 +59,17 @@ int main(int argc, char *argv[])
     signal(SIGINT, terminate);
     signal(SIGTERM, terminate);
 
-    QIK_Init("/dev/ttyUSB0", 115200, QIK_DEFAULT_DEVICE_ID);
+    if(CONFIG_Init("../config.ini", options.debugConfig) != 0)
+    {
+        exit(EXIT_FAILURE);
+    }
+    if (REMOTE_Init(configuration.remote.tcpPort) < 0)
+    {
+        fprintf(stderr, "ERROR: Failed to initialize remote.\n");
+        exit(EXIT_FAILURE);
+    }
+    /*
+    QIK_Init("/dev/ttyO4", 115200, QIK_DEFAULT_DEVICE_ID);
 
     tmp = QIK_GetFirmwareVersion();
     printf("FW %c\n", tmp);
@@ -89,16 +99,13 @@ int main(int argc, char *argv[])
     printf("QIK_PRM_M0_CURRENT_LIMIT_RESPONSE %d\n", tmp);
     tmp = QIK_GetConfigParam(QIK_PRM_M1_CURRENT_LIMIT_RESPONSE);
     printf("QIK_PRM_M1_CURRENT_LIMIT_RESPONSE %d\n", tmp);
+
+    */
 /*
     GPS_Init();
     if (INDICATION_Init() < 0)
     {
         fprintf(stderr, "ERROR: Failed to initialize indication.\n");
-        exit(EXIT_FAILURE);
-    }
-    if (REMOTE_Init(options.tcpPort) < 0)
-    {
-        fprintf(stderr, "ERROR: Failed to initialize remote.\n");
         exit(EXIT_FAILURE);
     }
     if (WHEEL_Init() < 0)
@@ -116,8 +123,10 @@ int main(int argc, char *argv[])
         SLEEP_Delay(1.0);
     }
 
+
+
     //WHEEL_Close();
-    //REMOTE_Close();
+    REMOTE_Close();
     //INDICATION_Close();
     //GPS_Close();
 
