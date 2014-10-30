@@ -16,6 +16,7 @@
 #include "sleep.h"
 #include "types.h"
 #include "debug.h"
+#include "ds2.h"
 
 pthread_t REMOTE_Thread;
 tcpserver_t REMOTE_ServerTCP;
@@ -121,15 +122,26 @@ void *REMOTE_Client()
     {
         if ((ret = TCPSERVER_Receive(&REMOTE_ServerTCP)) > 0)
         {
-            DEBUG_Print(options.debugRemote, debugRemote, "- RX: %s (%d B.).\n",
+            DEBUG_Print(options.debugTcpServer, debugRemote, "- RX: %s (%d B.).\n",
                     REMOTE_ServerTCP.dataBuffer,
                     REMOTE_ServerTCP.dataBufferLength);
+            sscanf((char *)REMOTE_ServerTCP.dataBuffer, "5:%d,%d,%d,%d,%d;", &ds2_data.speed, &ds2_data.angle, &ds2_data.brake, &ds2_data.pan, &ds2_data.tilt);
+            DEBUG_Print(options.debugRemote, debugRemote, "Speed = %+04d, Angle = %+04d, Brake = %+04d, Pan = %+03d, Tilt = %+03d.",
+                    ds2_data.speed, ds2_data.angle, ds2_data.brake, ds2_data.pan, ds2_data.tilt);
+            SLEEP_Delay(0.01);
+            sprintf((char *)REMOTE_ServerTCP.dataBuffer, "6:%d,%d,%d,%d,%d,%d;",
+                    ds2_data.left.speed, ds2_data.left.current, ds2_data.left.brake,
+                    ds2_data.right.speed, ds2_data.right.current, ds2_data.right.brake);
+            TCPSERVER_Send(&REMOTE_ServerTCP, REMOTE_ServerTCP.dataBuffer, (unsigned int)strlen((char *)REMOTE_ServerTCP.dataBuffer));
+
+            /*
             if ((ret = TCPSERVER_Send(&REMOTE_ServerTCP,
                     REMOTE_ServerTCP.dataBuffer,
                     REMOTE_ServerTCP.dataBufferLength)) < 0)
             {
                 break;
             }
+            */
         }
 
         SLEEP_Delay(0.001);

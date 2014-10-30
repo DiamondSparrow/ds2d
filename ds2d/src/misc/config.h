@@ -15,7 +15,7 @@ typedef struct _config_remote
 
 typedef struct _config_wheels
 {
-    const char* device;
+    const char *device;
     unsigned int speed;
 } config_wheels_t;
 

@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <math.h>
 
 #include "wheel.h"
 #include "qik.h"
@@ -18,13 +19,16 @@
 #include "types.h"
 #include "debug.h"
 #include "config.h"
+#include "ds2.h"
 
 pthread_t WHEEL_Thread;
 int WHEEL_Run = 0;
+wheel_t WHEEL_Data = {{0}, {0}};
 
 void *WHEEL_Control();
-static int WHEEL_SpeedControl(wheel_t *wheel);
-static int WHEEL_VariableRead(wheel_t *wheel);
+static void WHEEL_GetSpeed(double velocity, double angle, double *leftSpeed, double *rightSpeed);
+static void WHEEL_ControlSpeed(void);
+static void WHEEL_FeedbackControl(void);
 
 int WHEEL_Init(void)
 {
@@ -32,13 +36,10 @@ int WHEEL_Init(void)
 
     WHEEL_Run = TRUE;
 
-    if (QIK_Init(configuration.wheels.device, configuration.wheels.speed, QIK_DEFAULT_DEVICE_ID) < 0)
+    if (QIK_Init(configuration.wheels.device, configuration.wheels.speed, (unsigned char)QIK_DEFAULT_DEVICE_ID) < 0)
     {
         return -1;
     }
-
-    WHEEL_Left.id = WHEEL_LEFT_ID;
-    WHEEL_Right.id = WHEEL_RIGHT_ID;
 
     if ((ret = pthread_create(&WHEEL_Thread, NULL, WHEEL_Control, NULL)))
     {
@@ -60,36 +61,31 @@ int WHEEL_Close(void)
 
 void *WHEEL_Control(void)
 {
-    int ret = 0;
-
     pthread_setname_np(WHEEL_Thread, "ds2d-wheel");
 
     DEBUG_Print(options.debugWheel, debugWheel, "* started.");
-    WHEEL_Left.start = TRUE;
-    WHEEL_Right.start = TRUE;
 
     SLEEP_Delay(1.0);
 
     while (WHEEL_Run)
     {
-        ret = WHEEL_SpeedControl(&WHEEL_Left);
-        ret |= WHEEL_SpeedControl(&WHEEL_Right);
+        WHEEL_ControlSpeed();
+        WHEEL_FeedbackControl();
+        DEBUG_Print(options.debugWheel, debugWheel,
+                "left - speed = %+04.0f, current = %04d mA.; right - speed = %+04.0f, current = %04d mA; error = %02X",
+                WHEEL_Data.left.speed,
+                WHEEL_Data.left.current,
+                WHEEL_Data.right.speed,
+                WHEEL_Data.right.current,
+                WHEEL_Data.error);
+        ds2_data.left.speed     = WHEEL_Data.left.speed;
+        ds2_data.left.current   = WHEEL_Data.left.current;
+        ds2_data.left.brake      = WHEEL_Data.left.brake;
+        ds2_data.right.speed    = WHEEL_Data.right.speed;
+        ds2_data.right.current  = WHEEL_Data.right.current;
+        ds2_data.right.brake    = WHEEL_Data.right.brake;
 
-        if (ret != 0)
-        {
-            if (WHEEL_Left.stage == wheelVarWait)
-            {
-                WHEEL_Left.stage = wheelVarTemperature;
-            }
-            if (WHEEL_Right.stage == wheelVarWait)
-            {
-                WHEEL_Right.stage = wheelVarTemperature;
-            }
-            ret = 0;
-        }
-        WHEEL_VariableRead(&WHEEL_Left);
-        WHEEL_VariableRead(&WHEEL_Right);
-        SLEEP_Delay(0.01);
+        SLEEP_Delay(options.debugWheel ? 0.01 : 0.001);
     }
 
     DEBUG_Print(options.debugWheel, debugWheel, "x stopped.");
@@ -97,109 +93,128 @@ void *WHEEL_Control(void)
     return NULL;
 }
 
-static int WHEEL_SpeedControl(wheel_t *wheel)
+static void WHEEL_GetSpeed(double velocity, double angle, double *leftSpeed, double *rightSpeed)
 {
-    /*
-    int ret = 0;
-
-    if (wheel->start)
+    if (angle < 0.0)
     {
-        POLOLU_ExitSafeStart(wheel->id);
-        wheel->start = 0;
-        ret = 1;
+        angle = 360.0 + angle;
     }
 
-    if (wheel->speedPrev != wheel->speed)
+    if (angle == 90.0)      // Left and Right Forward
     {
-        wheel->speedPrev = wheel->speed;
-        if (wheel->speed > 0)
+        *leftSpeed = velocity;
+        *rightSpeed = velocity;
+    }
+    if (angle < 90.0 && angle > 0.0)
+    {
+        *leftSpeed = velocity;
+        *rightSpeed = ceil((velocity * ((angle - 45) * 2.222)) / 100);
+    }
+
+    if (angle == 0.0 || angle == 360)
+    {
+        *leftSpeed = velocity;
+        *rightSpeed = -velocity;
+    }
+    if (angle < 180.0 && angle > 90.0)
+    {
+        *leftSpeed = ceil((velocity * ((angle - 135) * -2.222)) / 100);
+        *rightSpeed = velocity;
+    }
+    if (angle == 180.0)
+    {
+        *leftSpeed = -velocity;
+        *rightSpeed = velocity;
+    }
+    if (angle > 180.0 && angle < 270.0)
+    {
+        *leftSpeed = -velocity;
+        *rightSpeed = ceil((velocity * ((angle - 225) * -2.222)) / 100);
+    }
+    if (angle == 270.0)
+    {
+        *leftSpeed = -velocity;
+        *rightSpeed = -velocity;
+    }
+    if (angle > 270.0 && angle < 360.0)
+    {
+        *leftSpeed = ceil((velocity * ((angle - 315) * 2.222)) / 100);
+        *rightSpeed = -velocity;
+    }
+
+    return;
+}
+
+static void WHEEL_ControlSpeed(void)
+{
+    int    brake = 0;
+    double speed = 0;
+    double angle = 0;
+    double leftSpeed = 0;
+    double rightSpeed = 0;
+
+    brake = ds2_data.brake;
+    speed = ds2_data.speed;
+    angle = ds2_data.angle;
+
+    if(brake > 0)
+    {
+        QIK_M0_Brake(brake);
+        QIK_M1_Brake(brake);
+
+        WHEEL_Data.left.speed  = 0;
+        WHEEL_Data.left.brake  = brake;
+        WHEEL_Data.right.speed = 0;
+        WHEEL_Data.right.brake = brake;
+    }
+    else
+    {
+        WHEEL_GetSpeed(speed, angle, &leftSpeed, &rightSpeed);
+
+        leftSpeed  = (leftSpeed  * (127.0 / 100.0));
+        rightSpeed = (rightSpeed * (127.0 / 100.0));
+
+        if(leftSpeed > 0)
         {
-            POLOLU_MotorForward(wheel->id, wheel->speed);
+            QIK_M0_Forward((unsigned char)leftSpeed);
         }
-        else if (wheel->speed < 0)
+        else if(leftSpeed < 0)
         {
-            POLOLU_MotorReverse(wheel->id, -1 * wheel->speed);
+            QIK_M0_Reverse((unsigned char)((-1) * leftSpeed));
         }
         else
         {
-            POLOLU_MotorBreake(wheel->id, wheel->breake);
+            QIK_M0_Brake(0);
         }
-        ret = 1;
+
+        if(rightSpeed > 0)
+        {
+            QIK_M1_Forward((unsigned char)rightSpeed);
+        }
+        else if(rightSpeed < 0)
+        {
+            QIK_M1_Reverse((unsigned char)((-1) * rightSpeed));
+        }
+        else
+        {
+            QIK_M1_Brake(0);
+        }
+
+        WHEEL_Data.left.speed  = leftSpeed;
+        WHEEL_Data.left.brake  = 0;
+        WHEEL_Data.right.speed = rightSpeed;
+        WHEEL_Data.right.brake = 0;
     }
-*/
-    return 0;
+
+    return;
 }
 
-static int WHEEL_VariableRead(wheel_t *wheel)
+static void WHEEL_FeedbackControl(void)
 {
-    /*
-    int i = 0;
-    switch (wheel->stage)
-    {
-    case wheelVarTemperature:
-        wheel->temperature = (float) POLOLU_GetVariable(wheel->id,
-                POLOLU_VARIABLE_TEMPERATURE) / 10;
-        wheel->varDebug = TRUE;
-        wheel->stage++;
-        break;
-    case wheelVarVoltage:
-        wheel->voltage = (float) POLOLU_GetVariable(wheel->id,
-                POLOLU_VARIABLE_INPUT_VOLTAGE) / 1000;
-        wheel->stage++;
-        break;
-    case wheelVarErrorStatus:
-        wheel->errorStatus = POLOLU_GetVariable(wheel->id,
-                POLOLU_VARIABLE_ERROR_STATUS);
-        wheel->errorOccured = POLOLU_GetVariable(wheel->id,
-                POLOLU_VARIABLE_ERRORS_OCCURED);
-        wheel->stage++;
-        break;
-    case wheelVarErrorSerial:
-        wheel->errorSerial = POLOLU_GetVariable(wheel->id,
-                POLOLU_VARIABLE_SERIAL_ERRORS_OCCURED);
-        wheel->stage++;
-        break;
-    case wheelVarLimitStatus:
-        wheel->limitStatus = POLOLU_GetVariable(wheel->id,
-                POLOLU_VARIABLE_LIMIT_STATUS);
-        wheel->stage++;
-        break;
-    case wheelVarResetFlags:
-        wheel->resetFlags = POLOLU_GetVariable(wheel->id,
-                POLOLU_VARIABLE_RESET_FLAGS);
-        wheel->stage++;
-        break;
-    case wheelVarDebug:
-        if (wheel->varDebug == TRUE)
-        {
-            wheel->varDebug = FALSE;
-            DEBUG_Print(options.debugWheel, debugWheel, "? %s data - "
-                    "temperature %05.02f C., voltage %03.02f V., "
-                    "Errors 0x%04X/0x%04X/%04X, Limits 0x%04X, Reset 0x%02X.",
-                    wheel->id == WHEEL_LEFT_ID ? "left " : "right",
-                    wheel->temperature, wheel->voltage, wheel->errorStatus,
-                    wheel->errorOccured, wheel->errorSerial, wheel->limitStatus,
-                    wheel->resetFlags);
-            for (i = 0; i < 10; i++)
-            {
-                if (BIT_IS_SET(wheel->errorOccured, i))
-                {
-                    fprintf(stderr, "ERROR: %s wheel error - %s.\n",
-                            wheel->id == WHEEL_LEFT_ID ? "Left" : "Right",
-                            POLOLU_Errors[i]);
-                }
-            }
-        }
-        wheel->stage++;
-        break;
-    case wheelVarWait:
-        break;
-    default:
-        wheel->stage = 0;
-        break;
-    }
-    */
+    WHEEL_Data.left.current  = QIK_M0_GetCurrent();
+    WHEEL_Data.right.current = QIK_M1_GetCurrent();
+    WHEEL_Data.error = QIK_GetErrorByte();
 
-    return 0;
+    return;
 }
 

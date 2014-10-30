@@ -15,7 +15,7 @@
 
 #include "comport.h"
 
-void COMPORT_Init(comport_t *com, int debug, char *device, int baudrate)
+void COMPORT_Init(comport_t *com, int debug, const char *device, int baudrate)
 {
 	com->debug = debug;
 	com->baudrate = baudrate;

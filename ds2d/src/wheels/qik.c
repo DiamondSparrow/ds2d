@@ -41,7 +41,7 @@ static void QIK_SendCommandParam(unsigned char command, unsigned char param);
 static unsigned char QIK_GetCommand(unsigned char command);
 static unsigned char QIK_GetCommandParam(unsigned char command, unsigned char param);
 
-int QIK_Init(char *device, int baudrate, unsigned char deviceID)
+int QIK_Init(const char *device, int baudrate, unsigned char deviceID)
 {
     COMPORT_Init(&QIK_ComData, FALSE, device, baudrate);
     if (COMPORT_Connect(&QIK_ComData) != 1)
@@ -110,9 +110,9 @@ void QIK_M0_Brake(unsigned char brake)
     return QIK_SendCommandParam(QIK_CMD_M0_BRAKE, brake);
 }
 
-unsigned char QIK_M0_GetCurrent(void)
+unsigned int QIK_M0_GetCurrent(void)
 {
-    return QIK_GetCommand(QIK_CMD_M0_GET_CURRENT);
+    return (QIK_GetCommand(QIK_CMD_M0_GET_CURRENT) * 150);
 }
 
 unsigned char QIK_M0_GetSpeed(void)
@@ -136,9 +136,9 @@ void QIK_M1_Brake(unsigned char brake)
     return QIK_SendCommandParam(QIK_CMD_M1_BRAKE, brake);
 }
 
-unsigned char QIK_M1_GetCurrent(void)
+unsigned int QIK_M1_GetCurrent(void)
 {
-    return QIK_GetCommand(QIK_CMD_M1_GET_CURRENT);
+    return (QIK_GetCommand(QIK_CMD_M1_GET_CURRENT) * 150);
 }
 
 unsigned char QIK_M1_GetSpeed(void)

@@ -63,7 +63,7 @@ typedef enum _qik_error
     QIK_ERROR_M1_OVERCURRENT    = 0x08,
     QIK_ERROR_SERIAL_HW_FAULT   = 0x10,
     QIK_ERROR_CRC_ERROR         = 0x20,
-    QIK_ERROR_FROMAT            = 0x40,
+    QIK_ERROR_FORMAT            = 0x40,
     QIK_ERROR_TIMEOUT           = 0x80,
 } qik_error_e;
 
@@ -78,7 +78,7 @@ typedef enum _qik_pwm
 } qik_pwm_e;
 
 // Init
-int QIK_Init(char *device, int baudrate, unsigned char deviceID);
+int QIK_Init(const char *device, int baudrate, unsigned char deviceID);
 // Genral
 unsigned char QIK_GetFirmwareVersion(void);
 unsigned char QIK_GetErrorByte(void);
@@ -88,13 +88,13 @@ unsigned char QIK_SetConfigParam(qik_param_e param, unsigned char paramValue);
 void QIK_M0_Forward(unsigned char speed);
 void QIK_M0_Reverse(unsigned char speed);
 void QIK_M0_Brake(unsigned char brake);
-unsigned char QIK_M0_GetCurrent(void);
+unsigned int QIK_M0_GetCurrent(void);
 unsigned char QIK_M0_GetSpeed(void);
 // Motor 1
 void QIK_M1_Forward(unsigned char speed);
 void QIK_M1_Reverse(unsigned char speed);
 void QIK_M1_Brake(unsigned char brake);
-unsigned char QIK_M1_GetCurrent(void);
+unsigned int QIK_M1_GetCurrent(void);
 unsigned char QIK_M1_GetSpeed(void);
 
 #endif /* QIK_H_ */

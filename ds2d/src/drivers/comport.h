@@ -24,7 +24,7 @@ typedef struct _comport
 	struct termios oldTermios;
 } comport_t;
 
-void COMPORT_Init(comport_t *com, int debug, char *device, int baudrate);
+void COMPORT_Init(comport_t *com, int debug, const char *device, int baudrate);
 int COMPORT_Connect(comport_t *com);
 int COMPORT_Send(comport_t *com, unsigned char *data, int dataCount);
 int COMPORT_Receive(comport_t *com, unsigned char *data, int dataCount);
