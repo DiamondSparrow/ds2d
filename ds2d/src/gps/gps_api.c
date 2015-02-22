@@ -12,7 +12,7 @@
 #include <pthread.h>
 #include <gps.h>
 
-#include "gps.h"
+#include "gps_api.h"
 #include "options.h"
 #include "sleep.h"
 #include "types.h"

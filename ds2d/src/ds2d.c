@@ -76,12 +76,14 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 */
+    /*
     if (WHEEL_Init() < 0)
     {
         fprintf(stderr, "ERROR: Failed to initialize wheel.\n");
         exit(EXIT_FAILURE);
     }
     SLEEP_Delay(0.1);
+    */
 
     DEBUG_Print(options.debug, debugMain, "# runnning.");
 
@@ -92,7 +94,7 @@ int main(int argc, char *argv[])
 
 
 
-    WHEEL_Close();
+    //WHEEL_Close();
     REMOTE_Close();
     //INDICATION_Close();
     //GPS_Close();

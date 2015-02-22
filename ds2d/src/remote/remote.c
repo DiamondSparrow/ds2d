@@ -134,14 +134,14 @@ void *REMOTE_Client()
                     ds2_data.right.speed, ds2_data.right.current, ds2_data.right.brake);
             TCPSERVER_Send(&REMOTE_ServerTCP, REMOTE_ServerTCP.dataBuffer, (unsigned int)strlen((char *)REMOTE_ServerTCP.dataBuffer));
 
-            /*
+
             if ((ret = TCPSERVER_Send(&REMOTE_ServerTCP,
                     REMOTE_ServerTCP.dataBuffer,
                     REMOTE_ServerTCP.dataBufferLength)) < 0)
             {
                 break;
             }
-            */
+
         }
 
         SLEEP_Delay(0.001);
